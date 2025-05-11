@@ -22,8 +22,8 @@
     "lint:styles": "stylelint ./**/*.{css,scss}",
     "format:scripts": "prettier . --write",
     "format:styles": "stylelint ./**/*.{css,scss} --fix",
-    "format": "npm run format:scripts && npm run format:styles"
-    },
+    "format": "pnpm run format:scripts && pnpm run format:styles"
+  },
   "devDependencies": {
     "@types/d3": "^7.4.3",
     "@types/jsdom": "^21.1.7",
