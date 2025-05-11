@@ -386,7 +386,7 @@ export class Stereonet {
         .style("padding", "4px 8px")
         .style("border-radius", "4px")
         .style("pointer-events", "none")
-        .style("font-size", "12px")
+        .style("font-size", "18px")
         .style("display", "none");
     }
 
