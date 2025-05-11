@@ -26,10 +26,10 @@ const DEFAULT_STYLE = {
     fill: "none",
   },
   data_plane: {
-    stroke: "#F00",
+    stroke: "#d14747",
     "stroke-width": 3,
     fill: "none",
-    // fill: "#F00",
+    // fill: "#d14747",
     // "fill-opacity": 0.5,
   },
   data_line: {
