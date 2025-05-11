@@ -27,12 +27,6 @@ jobs:
       - run: npm run build
       - run: npm audit signatures
 
-      - name: Publish to GitHub Packages
-        run: npm publish --access public
-
-      - name: Publish to npm
-        run: npm publish --access public
-
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
