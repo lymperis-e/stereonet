@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/lymperis-e/stereonet/compare/v1.1.2...v1.1.3) (2025-05-11)
+
+
+### Bug Fixes
+
+* update package.json to include ([df8865b](https://github.com/lymperis-e/stereonet/commit/df8865b9731a8e3ea819758cd79cb07cb3799164))
+
 ## [1.1.2](https://github.com/lymperis-e/stereonet/compare/v1.1.1...v1.1.2) (2025-05-11)
 
 
