@@ -19,7 +19,7 @@ const DEFAULT_STYLE = {
   },
   "crosshairs": {
     stroke: "#000",
-    "stroke-width": 2,
+    "stroke-width": 1,
     fill: "none",
   },
   "data_plane": {
@@ -47,6 +47,9 @@ interface StereonetOptions {
   selector: string;
   size?: number;
   style?: Record<string, Record<string, any>>;
+  animations?: {
+    duration: number;
+  } | false
 }
 
 /**
@@ -58,7 +61,7 @@ type PlanePath = d3.Selection<SVGPathElement, unknown, null, undefined>;
 /**
  * The D3 path type for rendered lines (lines are rendered as the points of their poles)
  */
-type LinePath = d3.Selection<SVGPathElement, unknown, null, undefined>;
+type LinePath = d3.Selection<SVGGElement, unknown, null, undefined>;
 
 /**
  * Stereonet class for creating a stereonet plot using D3.js.
@@ -78,15 +81,21 @@ export class Stereonet {
   path: d3.GeoPath;
   cardinalValues: string[];
   styles: Record<string, Record<string, any>>;
+  animations: {
+    duration: number;
+  } | false;
   planes: Map<string, PlanePath>;
   lines: Map<string, LinePath>;
 
 
-  constructor({ selector = "body", size = 1000, style = DEFAULT_STYLE }: StereonetOptions) {
+  constructor({ selector = "body", size = 1000, style = DEFAULT_STYLE, animations = {
+    duration: 300
+  } }: StereonetOptions) {
     this.width = size;
     this.height = size;
     this.selector = selector;
     this.styles = style;
+    this.animations = animations;
 
     this.svg = d3
       .select(selector)
@@ -233,11 +242,33 @@ export class Stereonet {
       });
   }
 
+  _validateDipDirection(dipAngle: number, dipDirection: number) {
+    if (dipAngle < 0 || dipAngle > 90) {
+      console.warn(`Dip angle must be between 0 and 90 degrees (${dipAngle} provided). Skipping.`);
+      return false;
+    }
+
+    if (dipDirection < 0 || dipDirection > 360) {
+      console.warn(`Dip direction must be between 0 and 360 degrees (${dipDirection} provided). Skipping.`);
+      return false;
+    }
+
+    return true;
+  }
+
+
   /**
    * Plots a line on the stereonet based on the given dip angle and dip direction.
    */
   addPlane(dipAngle: number, dipDirection: number) {
-    const id = this.planes.size
+
+    // Validate the dip angle and dip direction
+    if (!this._validateDipDirection(dipAngle, dipDirection)) {
+      return;
+    }
+
+    const id = this.planes.size;
+
 
     const extentStart = 90 - dipAngle;
     const extentEnd = 90 - (dipAngle - 1);
@@ -251,6 +282,8 @@ export class Stereonet {
       .step([1])
       .precision(1);
 
+    console.log(graticuleInput.lines())
+
     const path = this.g
       .append("path")
       .datum(graticuleInput)
@@ -260,7 +293,16 @@ export class Stereonet {
         `translate(${this.width / 2},${this.height / 2}) rotate(${dipDirection - 90})`
       )
       .attr("d", this.path)
-      .attr("data-id", id);
+      .attr("data-id", id)
+
+
+    if (this.animations) {
+      path.style("opacity", 0) // Start with opacity 0 for animation
+        .transition() // Add transition for animation
+        .duration(300) // Animation duration in milliseconds
+        .style("opacity", 1); // Fade in the plane
+    }
+
 
     this.planes.set(id.toString(), path as PlanePath);
     return id;
@@ -286,29 +328,56 @@ export class Stereonet {
    * Plot a linear measurement as a Point on the stereonet.
    */
   addLine(dipAngle: number, dipDirection: number) {
-    const id = this.lines.size;
+    // Validate the dip angle and dip direction
+    if (!this._validateDipDirection(dipAngle, dipDirection)) {
+      return;
+    }
 
-    // Convert to latitude and longitude in spherical coordinates
-    const {
-      x: longitude, y: latitude
-    } = dipDirectionToXY(dipAngle, dipDirection);
+    const id = this.lines.size;
 
     // GeoJSON point for projection
     const point = {
       type: "Point",
-      coordinates: [longitude, latitude],
+      coordinates: [0, 90 - dipAngle],
     };
 
     const path = this.g
       .append("path")
       .datum(point)
-      .attr("d", this.path.pointRadius(5))
       .attr("style", this.getStyle("data_line"))
-      .attr("transform", `translate(${this.width / 2},${this.height / 2})`)
-      .attr("data-id", id);
+      .attr("transform", `translate(${this.width / 2},${this.height / 2}) rotate(${dipDirection})`)
+      .attr("data-id", id)
+
+    if (this.animations) {
+      path
+        .attr("d", this.path.pointRadius(0))
+        .style("opacity", 0) // Start with opacity 0 for animation
+        .transition() // Add transition for animation
+        .duration(this.animations.duration) // Animation duration in milliseconds
+        .attr("d", this.path.pointRadius(5))
+        .style("opacity", 1); // Fade in the plane
+    }
+    else {
+      path.attr("d", this.path.pointRadius(5));
+    }
 
     this.lines.set(id.toString(), path as LinePath);
     return id;
+  }
+
+  removeLine(lineId: number) {
+    const strId = lineId.toString();
+
+    if (this.lines.has(strId)) {
+      this.lines.get(strId)?.remove();
+      this.lines.delete(strId);
+    }
+  }
+
+  getLines() {
+    return Array.from(this.lines).map(line => {
+      return { id: line[0], path: line[1] };
+    });
   }
 
   reverseDegrees(value: number) {
