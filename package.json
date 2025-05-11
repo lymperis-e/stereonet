@@ -1,6 +1,7 @@
 {
   "name": "stereonet-ts",
   "version": "0.0.5",
+  "scope": "@elymperis97",
   "module": "./dist/stereonet.ts",
   "type": "module",
   "repository": {
