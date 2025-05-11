@@ -4,7 +4,8 @@ import { defineConfig } from "vite";
 import packageJson from "./package.json";
 
 const getPackageName = () => {
-  return packageJson.name;
+  // return packageJson.name;
+  return "index"
 };
 
 const getPackageNameCamelCase = () => {

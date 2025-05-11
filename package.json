@@ -2,7 +2,7 @@
   "name": "stereonet",
   "version": "0.0.1",
   "scope": "@elymperis97",
-  "module": "./dist/stereonet.js",
+  "module": "./dist/index.js",
   "type": "module",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/stereonet.ts"
+      "import": "./dist/index.ts"
     },
     "./dist/": {
       "import": "./dist/"
