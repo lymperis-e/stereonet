@@ -1,6 +1,5 @@
 // streont.js
 import * as d3 from "d3";
-
 import "./style.css";
 
 const DEFAULT_STYLE = {
@@ -52,26 +51,13 @@ interface StereonetOptions {
   size?: number;
   style?: Record<string, Record<string, any>>;
   animations?:
-  | {
-    duration: number;
-  }
-  | false;
+    | {
+        duration: number;
+      }
+    | false;
+  showGraticules?: boolean; // New option to control graticules visibility
 }
 
-interface PoleRepresentation {
-  type: "Point";
-  coordinates: [number, number];
-}
-
-/**
- * The D3 path type for rendered planes.
- */
-type PlanePath = d3.Selection<SVGPathElement, GeoJSON.MultiLineString, HTMLElement, undefined>;
-
-/**
- * The D3 path type for rendered lines (lines are rendered as the points of their poles)
- */
-type LinePath = d3.Selection<SVGPathElement, PoleRepresentation, HTMLElement, undefined>;
 
 /**
  * Stereonet class for creating a stereonet plot using D3.js.
@@ -93,11 +79,12 @@ export class Stereonet {
   styles: Record<string, Record<string, any>>;
   animations:
     | {
-      duration: number;
-    }
+        duration: number;
+      }
     | false;
   planes: Map<string, PlanePath>;
   lines: Map<string, LinePath>;
+  graticulesVisible: boolean; // State to track graticules visibility
 
   constructor({
     selector = "body",
@@ -106,12 +93,14 @@ export class Stereonet {
     animations = {
       duration: 300,
     },
+    showGraticules = true, // Default to showing graticules
   }: StereonetOptions) {
     this.width = size;
     this.height = size;
     this.selector = selector;
     this.styles = style;
     this.animations = animations;
+    this.graticulesVisible = showGraticules;
 
     this.svg = d3
       .select(selector)
@@ -132,11 +121,13 @@ export class Stereonet {
     this.path = d3.geoPath().projection(this.projection);
 
     this.cardinalValues = ["S", "W", "N", "E"];
-    this.planes = new Map(); // Internal line registry
-    this.lines = new Map(); // Internal plane registry
+    this.planes = new Map();
+    this.lines = new Map();
 
-    this._renderBaseGraticules();
-    // this.renderLabels();
+    if (this.graticulesVisible) {
+      this._renderBaseGraticules();
+    }
+    this._renderOutlineCrosshairs();
   }
 
   /**
@@ -187,6 +178,7 @@ export class Stereonet {
     this.g
       .append("path")
       .datum(graticule2)
+      .attr("class", "graticule")
       .attr("style", this.getStyle("graticule"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
@@ -194,39 +186,68 @@ export class Stereonet {
     this.g
       .append("path")
       .datum(graticule10)
+      .attr("class", "graticule-10")
       .attr("style", this.getStyle("graticule_10_deg"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
 
-    // Add a 10x10 degree crosshair in the center
-    const crosshairs = d3
-      .geoGraticule()
-      .extent([
-        // lon, lat
-        [-5.49, -5.49], //min
-        [5.49, 5.49], //max
-      ])
-      .step([10, 10])
-      .precision(1);
-
-    this.g
-      .append("path")
-      .datum(crosshairs)
-      .attr("style", this.getStyle("crosshairs"))
-      .attr("transform", `${this._elementTransformString()} `)
-      .attr("d", this.path);
-
-
-    // Add outline circle
-    const outline = d3.geoCircle()
-      .center([0, 0])
-      .radius(90);
+    const outline = d3.geoCircle().center([0, 0]).radius(90);
     this.g
       .append("path")
       .datum(outline)
+      .attr("class", "outline")
       .attr("style", this.getStyle("outline"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
+  }
+
+  private _renderOutlineCrosshairs() {
+        // Add a 10x10 degree crosshair in the center
+        const crosshairs = d3
+        .geoGraticule()
+        .extent([
+          // lon, lat
+          [-5.49, -5.49], //min
+          [5.49, 5.49], //max
+        ])
+        .step([10, 10])
+        .precision(1);
+  
+      this.g
+        .append("path")
+        .datum(crosshairs)
+        .attr("style", this.getStyle("crosshairs"))
+        .attr("transform", `${this._elementTransformString()} `)
+        .attr("d", this.path);
+  
+  
+      // Add outline circle
+      const outline = d3.geoCircle()
+        .center([0, 0])
+        .radius(90);
+      this.g
+        .append("path")
+        .datum(outline)
+        .attr("style", this.getStyle("outline"))
+        .attr("transform", `${this._elementTransformString()} `)
+        .attr("d", this.path);
+  }
+
+  toggleGraticules() {
+    const show = !this.graticulesVisible
+    this.graticulesVisible = show;
+    this.g.selectAll(".graticule, .graticule-10, .outline").style(
+      "display",
+      show ? "block" : "none"
+    );
+  }
+
+  showGraticules() {
+    this.toggleGraticules(true);
+  }
+
+  hideGraticules() {
+    this.toggleGraticules(false);
   }
 
   private _renderLabels() {
