@@ -11,9 +11,6 @@ importers:
       d3:
         specifier: ^7.9.0
         version: 7.9.0
-      semantic-release:
-        specifier: ^24.2.3
-        version: 24.2.3(typescript@5.8.3)
     devDependencies:
       '@types/d3':
         specifier: ^7.4.3
@@ -60,6 +57,9 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
+      semantic-release:
+        specifier: ^24.2.3
+        version: 24.2.3(typescript@5.8.3)
       stylelint:
         specifier: ^16.14.1
         version: 16.19.1(typescript@5.8.3)
