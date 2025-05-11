@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/lymperis-e/stereonet/compare/v1.0.2...v1.0.3) (2025-05-11)
+
+
+### Bug Fixes
+
+* correct build folder in release.config.cjs ([2f22b40](https://github.com/lymperis-e/stereonet/commit/2f22b40ede2bfe82678f336425aa87dd5e097bba))
+* rel ([16d830f](https://github.com/lymperis-e/stereonet/commit/16d830f6fdee9959ceb73eb3bf718019fadfe64a))
+
 # Change Log
 
 All notable changes to the "vite-vanilla-ts-lib-starter" project will be documented in this file.
