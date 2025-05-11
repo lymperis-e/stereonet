@@ -371,7 +371,8 @@ export class Stereonet {
 
     path
       .on("mouseover", function () {
-        d3.select(this).style("stroke-width", "8px");
+        d3.select(this).style("stroke-width", "10px");
+        d3.select(this).style("opacity", 0.6);
         tooltip
           .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
           .style("display", "block");
@@ -386,6 +387,7 @@ export class Stereonet {
           "stroke-width",
           getStyle("data_plane")["stroke-width"]
         ); // Reset stroke width
+        d3.select(this).style("opacity", 1);
         tooltip.style("display", "none");
       });
   }
@@ -481,6 +483,7 @@ export class Stereonet {
       .on("mouseover", function () {
         // @ts-ignore
         d3.select(this).attr("d", classPath.pointRadius(9)); // Reset radius
+        d3.select(this).style("stroke-width", "10px");
         tooltip
           .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
           .style("display", "block");
@@ -493,6 +496,7 @@ export class Stereonet {
       .on("mouseout", function () {
         // @ts-ignore
         d3.select(this).attr("d", classPath.pointRadius(5)); // Reset radius
+        d3.select(this).style("stroke-width", "2px");
         tooltip.style("display", "none");
       });
   }
