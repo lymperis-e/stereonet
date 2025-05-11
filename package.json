@@ -19,7 +19,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build",
+    "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build && copyfiles ./LICENSE.md build",
     "semantic-release": "semantic-release",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
