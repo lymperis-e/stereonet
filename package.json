@@ -1,8 +1,8 @@
 {
-  "name": "stereonet-ts",
-  "version": "0.0.5",
+  "name": "stereonet",
+  "version": "0.0.1",
   "scope": "@elymperis97",
-  "module": "./dist/stereonet.ts",
+  "module": "./dist/stereonet.js",
   "type": "module",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "dev": "vite --host",
     "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build",
     "semantic-release": "semantic-release",
-    "local-release": "semantic-release",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint:scripts": "eslint . --ext .ts",
