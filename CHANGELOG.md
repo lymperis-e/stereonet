@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/lymperis-e/stereonet/compare/v1.0.3...v1.1.0) (2025-05-11)
+
+
+### Features
+
+* v1 ([a58497e](https://github.com/lymperis-e/stereonet/commit/a58497e7488f07969f492ae9ab96a5c49233fa68))
+
 ## [1.0.3](https://github.com/lymperis-e/stereonet/compare/v1.0.2...v1.0.3) (2025-05-11)
 
 
