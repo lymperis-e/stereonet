@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/lymperis-e/stereonet/compare/v1.1.0...v1.1.1) (2025-05-11)
+
+
+### Bug Fixes
+
+* rename built file to index ([8016110](https://github.com/lymperis-e/stereonet/commit/801611067df1e8ae32d5475a69cf41fca4a82405))
+
 # [1.1.0](https://github.com/lymperis-e/stereonet/compare/v1.0.3...v1.1.0) (2025-05-11)
 
 
