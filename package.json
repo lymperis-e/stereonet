@@ -4,6 +4,10 @@
   "version": "0.0.5",
   "module": "./dist/stereonet.ts",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lymperis-e/stereonet.git"
+  },
   "exports": {
     ".": {
       "import": "./dist/stereonet.ts"
