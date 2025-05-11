@@ -1,6 +1,5 @@
 {
   "name": "stereonet-ts",
-  "private": true,
   "version": "0.0.5",
   "module": "./dist/stereonet.ts",
   "type": "module",
