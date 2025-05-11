@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/lymperis-e/stereonet/compare/v1.1.1...v1.1.2) (2025-05-11)
+
+
+### Performance Improvements
+
+* add license ([97de8ac](https://github.com/lymperis-e/stereonet/commit/97de8ac070bd430f1319b5fb5a9ef2a171e205d9))
+
 ## [1.1.1](https://github.com/lymperis-e/stereonet/compare/v1.1.0...v1.1.1) (2025-05-11)
 
 
