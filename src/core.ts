@@ -2,6 +2,8 @@
 import * as d3 from "d3";
 import "./style.css";
 
+import { PlanePath, LinePath, PoleRepresentation } from "./types";
+
 const DEFAULT_STYLE = {
   outline: {
     fill: "none",
@@ -148,9 +150,7 @@ export class Stereonet {
     this.styles[className] = style;
   }
 
-  private _reverseDegrees(value: number) {
-    return -1 * value + 90;
-  }
+
 
   private _elementTransformString() {
     return `translate(${this.width / 2},${this.height / 2})`;
@@ -233,8 +233,8 @@ export class Stereonet {
         .attr("d", this.path);
   }
 
-  toggleGraticules() {
-    const show = !this.graticulesVisible
+  toggleGraticules(v: boolean | undefined) {
+    const show =  v === undefined ? !this.graticulesVisible : v;
     this.graticulesVisible = show;
     this.g.selectAll(".graticule, .graticule-10, .outline").style(
       "display",
@@ -250,76 +250,76 @@ export class Stereonet {
     this.toggleGraticules(false);
   }
 
-  private _renderLabels() {
-    const graticule10 = d3
-      .geoGraticule()
-      .extent([
-        [-90, -90],
-        [90.1, 90],
-      ])
-      .step([10, 10])
-      .precision(1);
+  // private _renderLabels() {
+  //   const graticule10 = d3
+  //     .geoGraticule()
+  //     .extent([
+  //       [-90, -90],
+  //       [90.1, 90],
+  //     ])
+  //     .step([10, 10])
+  //     .precision(1);
 
-    this.g
-      .selectAll(".graticule-label")
-      .data(graticule10.lines())
-      .enter()
-      .append("text")
-      .attr("class", "graticule-label")
-      // @ts-ignore
-      .text(d => {
-        d.coordinates.reverse();
-        if (
-          d.coordinates[0][0] === d.coordinates[1][0] &&
-          d.coordinates[0][0] >= 0
-        ) {
-          return this._reverseDegrees(d.coordinates[0][0]);
-        } else if (
-          d.coordinates[0][1] === d.coordinates[1][1] &&
-          d.coordinates[0][1] !== -90
-        ) {
-          return this._reverseDegrees(d.coordinates[0][1]);
-        }
-      }
-      )
-      .attr("dx", this.width / 3)
-      .attr("dy", this.height / 3)
-      .attr("style", d =>
-        this._reverseDegrees(d.coordinates[0][1]) > 90
-          ? "alignment-baseline: hanging"
-          : "alignment-baseline: alphabetic"
-      )
-      .attr(
-        "transform",
-        d =>
-          (() => {
-            const projected = this.projection([d.coordinates[1][0], d.coordinates[1][1]]);
-            if (!projected) {
-              throw new Error("Projection returned null");
-            }
-            return `translate(${projected[0]},${projected[1]})`;
-          })()
-      );
+  //   this.g
+  //     .selectAll(".graticule-label")
+  //     .data(graticule10.lines())
+  //     .enter()
+  //     .append("text")
+  //     .attr("class", "graticule-label")
+  //     // @ts-ignore
+  //     .text(d => {
+  //       d.coordinates.reverse();
+  //       if (
+  //         d.coordinates[0][0] === d.coordinates[1][0] &&
+  //         d.coordinates[0][0] >= 0
+  //       ) {
+  //         return this._reverseDegrees(d.coordinates[0][0]);
+  //       } else if (
+  //         d.coordinates[0][1] === d.coordinates[1][1] &&
+  //         d.coordinates[0][1] !== -90
+  //       ) {
+  //         return this._reverseDegrees(d.coordinates[0][1]);
+  //       }
+  //     }
+  //     )
+  //     .attr("dx", this.width / 3)
+  //     .attr("dy", this.height / 3)
+  //     .attr("style", d =>
+  //       this._reverseDegrees(d.coordinates[0][1]) > 90
+  //         ? "alignment-baseline: hanging"
+  //         : "alignment-baseline: alphabetic"
+  //     )
+  //     .attr(
+  //       "transform",
+  //       d =>
+  //         (() => {
+  //           const projected = this.projection([d.coordinates[1][0], d.coordinates[1][1]]);
+  //           if (!projected) {
+  //             throw new Error("Projection returned null");
+  //           }
+  //           return `translate(${projected[0]},${projected[1]})`;
+  //         })()
+  //     );
 
-    this.g
-      .selectAll<SVGTextElement, string>(".cardinal")
-      .data(this.cardinalValues)
-      .enter()
-      .append("text")
-      .attr("class", "cardinal")
-      .text((d: string) => d)
-      .attr("dx", this.width / 2)
-      .attr("dy", this.height / 2)
-      .attr("transform", (d: string) => {
-        const index = this.cardinalValues.indexOf(d);
-        const coords: [number, number] = [-180 + index * 90, -90 + index * 90];
-        const projected = this.projection(coords);
-        if (!projected) {
-          throw new Error("Projection returned null");
-        }
-        return `translate(${projected[0]},${projected[1]})`;
-      });
-  }
+  //   this.g
+  //     .selectAll<SVGTextElement, string>(".cardinal")
+  //     .data(this.cardinalValues)
+  //     .enter()
+  //     .append("text")
+  //     .attr("class", "cardinal")
+  //     .text((d: string) => d)
+  //     .attr("dx", this.width / 2)
+  //     .attr("dy", this.height / 2)
+  //     .attr("transform", (d: string) => {
+  //       const index = this.cardinalValues.indexOf(d);
+  //       const coords: [number, number] = [-180 + index * 90, -90 + index * 90];
+  //       const projected = this.projection(coords);
+  //       if (!projected) {
+  //         throw new Error("Projection returned null");
+  //       }
+  //       return `translate(${projected[0]},${projected[1]})`;
+  //     });
+  // }
 
   private _validateDipDirection(dipAngle: number, dipDirection: number) {
     if (dipAngle < 0 || dipAngle > 90) {
