@@ -4,6 +4,12 @@ import * as d3 from "d3";
 import "./style.css";
 
 const DEFAULT_STYLE = {
+  outline: {
+    fill: "none",
+    stroke: "#000",
+    "stroke-width": "4px",
+    "stroke-opacity": .5,
+  },
   graticule: {
     fill: "none",
     stroke: " #777",
@@ -209,6 +215,18 @@ export class Stereonet {
       .attr("style", this.getStyle("crosshairs"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
+
+
+    // Add outline circle
+    const outline = d3.geoCircle()
+      .center([0, 0])
+      .radius(90);
+    this.g
+      .append("path")
+      .datum(outline)
+      .attr("style", this.getStyle("outline"))
+      .attr("transform", `${this._elementTransformString()} `)
+      .attr("d", this.path);
   }
 
   private _renderLabels() {
@@ -242,7 +260,7 @@ export class Stereonet {
           return this._reverseDegrees(d.coordinates[0][1]);
         }
       }
-     )
+      )
       .attr("dx", this.width / 3)
       .attr("dy", this.height / 3)
       .attr("style", d =>
@@ -416,7 +434,7 @@ export class Stereonet {
   }
 
   private _addLineHoverInteraction(
-    path:  LinePath,
+    path: LinePath,
     dipAngle: number,
     dipDirection: number
   ) {
