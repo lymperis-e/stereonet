@@ -8,6 +8,7 @@ const getPackageName = () => {
 };
 
 const getPackageNameCamelCase = () => {
+  
   try {
     return getPackageName().replace(/-./g, char => char[1].toUpperCase());
   } catch (err) {
