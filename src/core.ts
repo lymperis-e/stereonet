@@ -2,7 +2,6 @@
 import * as d3 from "d3";
 
 import "./style.css";
-import { dipDirectionToXY } from "./geometry";
 
 
 const DEFAULT_STYLE = {
@@ -24,7 +23,7 @@ const DEFAULT_STYLE = {
   },
   "data_plane": {
     stroke: "#F00",
-    "stroke-width": 2,
+    "stroke-width": 3,
     fill: "none"
     // fill: "#F00",
     // "fill-opacity": 0.5,
@@ -242,7 +241,7 @@ export class Stereonet {
       });
   }
 
-  _validateDipDirection(dipAngle: number, dipDirection: number) {
+  private _validateDipDirection(dipAngle: number, dipDirection: number) {
     if (dipAngle < 0 || dipAngle > 90) {
       console.warn(`Dip angle must be between 0 and 90 degrees (${dipAngle} provided). Skipping.`);
       return false;
@@ -254,6 +253,54 @@ export class Stereonet {
     }
 
     return true;
+  }
+
+  private _addPlaneHoverInteraction(
+    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    dipAngle: number,
+    dipDirection: number
+  ) {
+    // Add tooltip element if it doesn't exist
+    if (!d3.select("#plane-tooltip").node()) {
+      d3.select("body")
+        .append("div")
+        .attr("id", "plane-tooltip")
+        .style("position", "absolute")
+        .style("background", "rgba(0,0,0,0.7)")
+        .style("color", "#fff")
+        .style("padding", "4px 8px")
+        .style("border-radius", "4px")
+        .style("pointer-events", "none")
+        .style("font-size", "18px")
+        .style("display", "none");
+    }
+
+    const tooltip = d3.select("#plane-tooltip");
+
+    const getStyle = (className: string) => {
+      const style = this.styles[className];
+      if (!style) {
+        throw new Error(`Style for class "${className}" not found.`);
+      }
+      return style
+    }
+
+    path
+      .on("mouseover", function () {
+        d3.select(this).style("stroke-width", "8px");
+        tooltip
+          .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
+          .style("display", "block");
+      })
+      .on("mousemove", function (event) {
+        tooltip
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY + 10 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select(this).style("stroke-width", getStyle("data_plane")["stroke-width"]); // Reset stroke width
+        tooltip.style("display", "none");
+      });
   }
 
 
@@ -282,8 +329,6 @@ export class Stereonet {
       .step([1])
       .precision(1);
 
-    console.log(graticuleInput.lines())
-
     const path = this.g
       .append("path")
       .datum(graticuleInput)
@@ -303,6 +348,7 @@ export class Stereonet {
         .style("opacity", 1); // Fade in the plane
     }
 
+    this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
 
     this.planes.set(id.toString(), path as PlanePath);
     return id;
@@ -323,6 +369,48 @@ export class Stereonet {
     });
   }
 
+
+
+  private _addLineHoverInteraction(
+    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    dipAngle: number,
+    dipDirection: number
+  ) {
+    if (!d3.select("#line-tooltip").node()) {
+      d3.select("body")
+        .append("div")
+        .attr("id", "line-tooltip")
+        .style("position", "absolute")
+        .style("background", "rgba(0,0,0,0.7)")
+        .style("color", "#fff")
+        .style("padding", "4px 8px")
+        .style("border-radius", "4px")
+        .style("pointer-events", "none")
+        .style("font-size", "12px")
+        .style("display", "none");
+    }
+
+    const tooltip = d3.select("#line-tooltip");
+
+    const classPath = this.path
+
+    path
+      .on("mouseover", function () {
+        d3.select(this).attr("d", classPath.pointRadius(9)); // Reset radius
+        tooltip
+          .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
+          .style("display", "block");
+      })
+      .on("mousemove", function (event) {
+        tooltip
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY + 10 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select(this).attr("d", classPath.pointRadius(5)); // Reset radius
+        tooltip.style("display", "none");
+      });
+  }
 
   /**
    * Plot a linear measurement as a Point on the stereonet.
@@ -360,6 +448,10 @@ export class Stereonet {
     else {
       path.attr("d", this.path.pointRadius(5));
     }
+
+
+    this._addLineHoverInteraction(path, dipAngle, dipDirection);
+
 
     this.lines.set(id.toString(), path as LinePath);
     return id;
