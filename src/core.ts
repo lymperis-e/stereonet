@@ -46,21 +46,26 @@ interface StereonetOptions {
   size?: number;
   style?: Record<string, Record<string, any>>;
   animations?:
-    | {
-        duration: number;
-      }
-    | false;
+  | {
+    duration: number;
+  }
+  | false;
+}
+
+interface PoleRepresentation {
+  type: "Point";
+  coordinates: [number, number];
 }
 
 /**
  * The D3 path type for rendered planes.
  */
-type PlanePath = d3.Selection<SVGPathElement, unknown, null, undefined>;
+type PlanePath = d3.Selection<SVGPathElement, GeoJSON.MultiLineString, HTMLElement, undefined>;
 
 /**
  * The D3 path type for rendered lines (lines are rendered as the points of their poles)
  */
-type LinePath = d3.Selection<SVGGElement, unknown, null, undefined>;
+type LinePath = d3.Selection<SVGPathElement, PoleRepresentation, HTMLElement, undefined>;
 
 /**
  * Stereonet class for creating a stereonet plot using D3.js.
@@ -74,16 +79,16 @@ export class Stereonet {
   width: number;
   height: number;
   selector: string;
-  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
-  g: d3.Selection<SVGGElement, unknown, null, undefined>;
+  svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, undefined>;
+  g: d3.Selection<SVGGElement, unknown, HTMLElement, undefined>;
   projection: d3.GeoProjection;
   path: d3.GeoPath;
   cardinalValues: string[];
   styles: Record<string, Record<string, any>>;
   animations:
     | {
-        duration: number;
-      }
+      duration: number;
+    }
     | false;
   planes: Map<string, PlanePath>;
   lines: Map<string, LinePath>;
@@ -124,7 +129,7 @@ export class Stereonet {
     this.planes = new Map(); // Internal line registry
     this.lines = new Map(); // Internal plane registry
 
-    this.renderBaseGraticules();
+    this._renderBaseGraticules();
     // this.renderLabels();
   }
 
@@ -146,7 +151,15 @@ export class Stereonet {
     this.styles[className] = style;
   }
 
-  renderBaseGraticules() {
+  private _reverseDegrees(value: number) {
+    return -1 * value + 90;
+  }
+
+  private _elementTransformString() {
+    return `translate(${this.width / 2},${this.height / 2})`;
+  }
+
+  private _renderBaseGraticules() {
     const graticule2 = d3
       .geoGraticule()
       .extent([
@@ -169,14 +182,14 @@ export class Stereonet {
       .append("path")
       .datum(graticule2)
       .attr("style", this.getStyle("graticule"))
-      .attr("transform", `translate(${this.width / 2},${this.height / 2})`)
+      .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
 
     this.g
       .append("path")
       .datum(graticule10)
       .attr("style", this.getStyle("graticule_10_deg"))
-      .attr("transform", `translate(${this.width / 2},${this.height / 2})`)
+      .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
 
     // Add a 10x10 degree crosshair in the center
@@ -194,11 +207,11 @@ export class Stereonet {
       .append("path")
       .datum(crosshairs)
       .attr("style", this.getStyle("crosshairs"))
-      .attr("transform", `translate(${this.width / 2},${this.height / 2})`)
+      .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
   }
 
-  renderLabels() {
+  private _renderLabels() {
     const graticule10 = d3
       .geoGraticule()
       .extent([
@@ -214,31 +227,39 @@ export class Stereonet {
       .enter()
       .append("text")
       .attr("class", "graticule-label")
+      // @ts-ignore
       .text(d => {
         d.coordinates.reverse();
         if (
           d.coordinates[0][0] === d.coordinates[1][0] &&
           d.coordinates[0][0] >= 0
         ) {
-          return this.reverseDegrees(d.coordinates[0][0]);
+          return this._reverseDegrees(d.coordinates[0][0]);
         } else if (
           d.coordinates[0][1] === d.coordinates[1][1] &&
           d.coordinates[0][1] !== -90
         ) {
-          return this.reverseDegrees(d.coordinates[0][1]);
+          return this._reverseDegrees(d.coordinates[0][1]);
         }
-      })
+      }
+     )
       .attr("dx", this.width / 3)
       .attr("dy", this.height / 3)
       .attr("style", d =>
-        this.reverseDegrees(d.coordinates[0][1]) > 90
+        this._reverseDegrees(d.coordinates[0][1]) > 90
           ? "alignment-baseline: hanging"
           : "alignment-baseline: alphabetic"
       )
       .attr(
         "transform",
         d =>
-          `translate(${this.projection(d.coordinates[1])[0]},${this.projection(d.coordinates[1])[1]})`
+          (() => {
+            const projected = this.projection([d.coordinates[1][0], d.coordinates[1][1]]);
+            if (!projected) {
+              throw new Error("Projection returned null");
+            }
+            return `translate(${projected[0]},${projected[1]})`;
+          })()
       );
 
     this.g
@@ -280,7 +301,7 @@ export class Stereonet {
   }
 
   private _addPlaneHoverInteraction(
-    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    path: PlanePath,
     dipAngle: number,
     dipDirection: number
   ) {
@@ -350,6 +371,7 @@ export class Stereonet {
         [extentStart, -90],
         [extentEnd, 90],
       ])
+      // @ts-ignore
       .step([1])
       .precision(1);
 
@@ -359,7 +381,7 @@ export class Stereonet {
       .attr("style", this.getStyle("data_plane"))
       .attr(
         "transform",
-        `translate(${this.width / 2},${this.height / 2}) rotate(${dipDirection - 90})`
+        `${this._elementTransformString()}  rotate(${dipDirection - 90})`
       )
       .attr("d", this.path)
       .attr("data-id", id);
@@ -394,7 +416,7 @@ export class Stereonet {
   }
 
   private _addLineHoverInteraction(
-    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    path:  LinePath,
     dipAngle: number,
     dipDirection: number
   ) {
@@ -418,6 +440,7 @@ export class Stereonet {
 
     path
       .on("mouseover", function () {
+        // @ts-ignore
         d3.select(this).attr("d", classPath.pointRadius(9)); // Reset radius
         tooltip
           .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
@@ -429,6 +452,7 @@ export class Stereonet {
           .style("top", event.pageY + 10 + "px");
       })
       .on("mouseout", function () {
+        // @ts-ignore
         d3.select(this).attr("d", classPath.pointRadius(5)); // Reset radius
         tooltip.style("display", "none");
       });
@@ -449,7 +473,7 @@ export class Stereonet {
     const point = {
       type: "Point",
       coordinates: [0, 90 - dipAngle],
-    };
+    } as PoleRepresentation;
 
     const path = this.g
       .append("path")
@@ -457,19 +481,22 @@ export class Stereonet {
       .attr("style", this.getStyle("data_line"))
       .attr(
         "transform",
-        `translate(${this.width / 2},${this.height / 2}) rotate(${dipDirection})`
+        `${this._elementTransformString()}  rotate(${dipDirection})`
       )
       .attr("data-id", id);
 
     if (this.animations) {
       path
+        // @ts-ignore
         .attr("d", this.path.pointRadius(0))
         .style("opacity", 0) // Start with opacity 0 for animation
         .transition() // Add transition for animation
         .duration(this.animations.duration) // Animation duration in milliseconds
+        // @ts-ignore
         .attr("d", this.path.pointRadius(5))
         .style("opacity", 1); // Fade in the plane
     } else {
+      // @ts-ignore
       path.attr("d", this.path.pointRadius(5));
     }
 
@@ -494,7 +521,5 @@ export class Stereonet {
     });
   }
 
-  reverseDegrees(value: number) {
-    return -1 * value + 90;
-  }
+
 }

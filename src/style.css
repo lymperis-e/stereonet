@@ -11,8 +11,8 @@
 .graticule {
   fill: none;
   stroke: #777;
-  stroke-width: 0.5px;
   stroke-opacity: 0.5;
+  stroke-width: 0.5px;
 }
 
 .graticule_10_deg {
@@ -28,9 +28,9 @@
 }
 
 .warning {
-  font-size: 2em;
   color: #f00;
   display: none;
+  font-size: 2em;
 }
 
 .cardinal {
