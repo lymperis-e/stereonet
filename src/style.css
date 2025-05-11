@@ -1,0 +1,39 @@
+.stroke {
+    fill: none;
+    stroke: #000;
+    stroke-width: 3px;
+  }
+  
+  .fill {
+    fill: #fff;
+  }
+  
+  .graticule {
+    fill: none;
+    stroke: #777;
+    stroke-width: .5px;
+    stroke-opacity: .5;
+  }
+  
+  .graticule_10_deg {
+    fill: none;
+    stroke: #000;
+    stroke-width: .5px;
+  }
+  
+  .graticule_input_plane {
+    fill: none;
+    stroke: #F00;
+    stroke-width: 1px;
+  }
+  
+  .warning{
+    font-size: 2em;
+    color: #F00;
+    display: none;
+  }
+  
+  .cardinal{
+    font-size: 1.5em;
+    text-anchor: middle;
+  }
