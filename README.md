@@ -3,7 +3,9 @@
 
 ## Overview
 
-Stereonet.js is a minimalistic TypeScript library for creating stereonet plots using D3.js. It provides an intuitive API for plotting planes and lines on a stereonet, with built-in support for animations, tooltips, and customizable styles.
+Stereonet.ts is a minimalistic TypeScript library for creating stereonet (Schmidt network) plots using [D3](https://github.com/d3/d3). It provides an intuitive API for plotting planes and lines on a stereonet, with built-in support for animations, tooltips, and customizable styles. 
+
+> [Schmidt networks](https://en.wikipedia.org/wiki/Schmidt_net) are used in geology and structural geology to visualize the orientation of planes and lines in three-dimensional space. A Schmidt net is essentially a stereographic projection of the bottom hemisphere of a sphere. A plane is represented as an arc, which corresponds to the cross-section of that plane with the bottom hemisphere, assuming the plane contains the center of the sphere. A line is represented as a point on the net, which corresponds to the intersection of that line with the bottom hemisphere.
 
 ![alt text](docs/screenshot.png)
 
