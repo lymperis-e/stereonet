@@ -28,6 +28,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build && copyfiles ./LICENSE.md build",
+    "build:gh-pages": "vite build --mode=example",
+    "deploy:gh-pages": "npm run build:gh-pages && gh-pages -d dist",
     "semantic-release": "semantic-release",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -53,6 +55,7 @@
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",
+    "gh-pages": "^6.3.0",
     "jiti": "^2.4.2",
     "lint-staged": "^15.4.3",
     "postcss": "^8.5.3",
