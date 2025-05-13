@@ -9,7 +9,7 @@ const DEFAULT_STYLE = {
     fill: "none",
     stroke: "#000",
     "stroke-width": "4px",
-    "stroke-opacity": .5,
+    "stroke-opacity": 0.5,
   },
   graticule: {
     fill: "none",
@@ -59,7 +59,6 @@ interface StereonetOptions {
     | false;
   showGraticules?: boolean; // New option to control graticules visibility
 }
-
 
 /**
  * Stereonet class for creating a stereonet plot using D3.js.
@@ -150,8 +149,6 @@ export class Stereonet {
     this.styles[className] = style;
   }
 
-
-
   private _elementTransformString() {
     return `translate(${this.width / 2},${this.height / 2})`;
   }
@@ -202,44 +199,40 @@ export class Stereonet {
   }
 
   private _renderOutlineCrosshairs() {
-        // Add a 10x10 degree crosshair in the center
-        const crosshairs = d3
-        .geoGraticule()
-        .extent([
-          // lon, lat
-          [-5.49, -5.49], //min
-          [5.49, 5.49], //max
-        ])
-        .step([10, 10])
-        .precision(1);
-  
-      this.g
-        .append("path")
-        .datum(crosshairs)
-        .attr("style", this.getStyle("crosshairs"))
-        .attr("transform", `${this._elementTransformString()} `)
-        .attr("d", this.path);
-  
-  
-      // Add outline circle
-      const outline = d3.geoCircle()
-        .center([0, 0])
-        .radius(90);
-      this.g
-        .append("path")
-        .datum(outline)
-        .attr("style", this.getStyle("outline"))
-        .attr("transform", `${this._elementTransformString()} `)
-        .attr("d", this.path);
+    // Add a 10x10 degree crosshair in the center
+    const crosshairs = d3
+      .geoGraticule()
+      .extent([
+        // lon, lat
+        [-5.49, -5.49], //min
+        [5.49, 5.49], //max
+      ])
+      .step([10, 10])
+      .precision(1);
+
+    this.g
+      .append("path")
+      .datum(crosshairs)
+      .attr("style", this.getStyle("crosshairs"))
+      .attr("transform", `${this._elementTransformString()} `)
+      .attr("d", this.path);
+
+    // Add outline circle
+    const outline = d3.geoCircle().center([0, 0]).radius(90);
+    this.g
+      .append("path")
+      .datum(outline)
+      .attr("style", this.getStyle("outline"))
+      .attr("transform", `${this._elementTransformString()} `)
+      .attr("d", this.path);
   }
 
   toggleGraticules(v: boolean | undefined) {
-    const show =  v === undefined ? !this.graticulesVisible : v;
+    const show = v === undefined ? !this.graticulesVisible : v;
     this.graticulesVisible = show;
-    this.g.selectAll(".graticule, .graticule-10, .outline").style(
-      "display",
-      show ? "block" : "none"
-    );
+    this.g
+      .selectAll(".graticule, .graticule-10, .outline")
+      .style("display", show ? "block" : "none");
   }
 
   showGraticules() {
@@ -250,76 +243,6 @@ export class Stereonet {
     this.toggleGraticules(false);
   }
 
-  // private _renderLabels() {
-  //   const graticule10 = d3
-  //     .geoGraticule()
-  //     .extent([
-  //       [-90, -90],
-  //       [90.1, 90],
-  //     ])
-  //     .step([10, 10])
-  //     .precision(1);
-
-  //   this.g
-  //     .selectAll(".graticule-label")
-  //     .data(graticule10.lines())
-  //     .enter()
-  //     .append("text")
-  //     .attr("class", "graticule-label")
-  //     // @ts-ignore
-  //     .text(d => {
-  //       d.coordinates.reverse();
-  //       if (
-  //         d.coordinates[0][0] === d.coordinates[1][0] &&
-  //         d.coordinates[0][0] >= 0
-  //       ) {
-  //         return this._reverseDegrees(d.coordinates[0][0]);
-  //       } else if (
-  //         d.coordinates[0][1] === d.coordinates[1][1] &&
-  //         d.coordinates[0][1] !== -90
-  //       ) {
-  //         return this._reverseDegrees(d.coordinates[0][1]);
-  //       }
-  //     }
-  //     )
-  //     .attr("dx", this.width / 3)
-  //     .attr("dy", this.height / 3)
-  //     .attr("style", d =>
-  //       this._reverseDegrees(d.coordinates[0][1]) > 90
-  //         ? "alignment-baseline: hanging"
-  //         : "alignment-baseline: alphabetic"
-  //     )
-  //     .attr(
-  //       "transform",
-  //       d =>
-  //         (() => {
-  //           const projected = this.projection([d.coordinates[1][0], d.coordinates[1][1]]);
-  //           if (!projected) {
-  //             throw new Error("Projection returned null");
-  //           }
-  //           return `translate(${projected[0]},${projected[1]})`;
-  //         })()
-  //     );
-
-  //   this.g
-  //     .selectAll<SVGTextElement, string>(".cardinal")
-  //     .data(this.cardinalValues)
-  //     .enter()
-  //     .append("text")
-  //     .attr("class", "cardinal")
-  //     .text((d: string) => d)
-  //     .attr("dx", this.width / 2)
-  //     .attr("dy", this.height / 2)
-  //     .attr("transform", (d: string) => {
-  //       const index = this.cardinalValues.indexOf(d);
-  //       const coords: [number, number] = [-180 + index * 90, -90 + index * 90];
-  //       const projected = this.projection(coords);
-  //       if (!projected) {
-  //         throw new Error("Projection returned null");
-  //       }
-  //       return `translate(${projected[0]},${projected[1]})`;
-  //     });
-  // }
 
   private _validateDipDirection(dipAngle: number, dipDirection: number) {
     if (dipAngle < 0 || dipAngle > 90) {
@@ -563,6 +486,4 @@ export class Stereonet {
       return { id: line[0], path: line[1] };
     });
   }
-
-
 }
