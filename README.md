@@ -261,13 +261,3 @@ stereonet.setStyle("data_plane", { stroke: "#00ff00", "stroke-width": "5px" });
 
 - Vite library-mode setup bootstrapped using [kbysiec/vite-vanilla-ts-lib-starter](https://github.com/kbysiec/vite-vanilla-ts-lib-starter/).
 - Based on [this article](https://medium.com/@rickgao/d3-schmidt-net-visualization-6779a7b81d2b) by Rick Gao. Respective CodePen [here](https://codepen.io/rickgao/pen/BQYwoa).
-
-
-
-
-
-
-
-### Aknowledgements
-- Vite library-mode setup bootstrapped using [kbysiec/vite-vanilla-ts-lib-starter](https://github.com/kbysiec/vite-vanilla-ts-lib-starter/)
-- Based on [this article](https://medium.com/@rickgao/d3-schmidt-net-visualization-6779a7b81d2b) by Rick Gao. Respective codepen [here](https://codepen.io/rickgao/pen/BQYwoa)
