@@ -1,4 +1,5 @@
-# Stereonet.js Documentation
+# Stereonet 
+[![Release](https://github.com/lymperis-e/stereonet/actions/workflows/release.yml/badge.svg)](https://github.com/lymperis-e/stereonet/actions/workflows/release.yml) [![npm version](https://badge.fury.io/js/stereonet.svg)](https://badge.fury.io/js/stereonet) ![NPM Downloads](https://img.shields.io/npm/dw/stereonet)
 
 ## Overview
 
