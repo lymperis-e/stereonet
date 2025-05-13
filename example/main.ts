@@ -1,4 +1,4 @@
-import { Stereonet } from "../build"
+import { Stereonet } from "../src"
 
 const streonet = new Stereonet({ selector: "body", size: 900 });
 
