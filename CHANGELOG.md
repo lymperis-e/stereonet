@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/lymperis-e/stereonet/compare/v1.1.3...v1.1.4) (2025-05-14)
+
+
+### Bug Fixes
+
+* update license in package.json ([9bc2b77](https://github.com/lymperis-e/stereonet/commit/9bc2b77419f7f940cc69b3dcbdd8b9e31956bb41))
+
 ## [1.1.3](https://github.com/lymperis-e/stereonet/compare/v1.1.2...v1.1.3) (2025-05-11)
 
 
