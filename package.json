@@ -4,6 +4,8 @@
   "scope": "@elymperis97",
   "module": "./dist/index.js",
   "type": "module",
+  "license": "MIT",
+  "description": "A simple stereonet for structural geology, developed in TS ",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lymperis-e/stereonet.git"
