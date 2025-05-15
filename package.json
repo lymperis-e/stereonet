@@ -29,7 +29,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build && copyfiles ./LICENSE.md build",
+    "build": "vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts && copyfiles ./package.json build && copyfiles ./LICENSE.md build && copyfiles ./README.md build",
     "build:gh-pages": "vite build --mode=example",
     "deploy:gh-pages": "npm run build:gh-pages && gh-pages -d dist",
     "semantic-release": "semantic-release",
