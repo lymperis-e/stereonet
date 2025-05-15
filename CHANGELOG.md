@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/lymperis-e/stereonet/compare/v1.1.4...v1.1.5) (2025-05-15)
+
+
+### Bug Fixes
+
+* add README to package dir ([8ba4ffb](https://github.com/lymperis-e/stereonet/commit/8ba4ffbcd1fbde46f184b235e9fa3da9dc2d9341))
+
 ## [1.1.4](https://github.com/lymperis-e/stereonet/compare/v1.1.3...v1.1.4) (2025-05-14)
 
 
