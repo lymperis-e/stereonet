@@ -13,3 +13,9 @@ export type PlanePath = d3.Selection<SVGPathElement, GeoJSON.MultiLineString, HT
  * The D3 path type for rendered lines (lines are rendered as the points of their poles)
  */
 export type LinePath = d3.Selection<SVGPathElement, PoleRepresentation, HTMLElement, undefined>;
+
+export type PlaneData = {
+  dipAngle: number;
+  dipDirection: number;
+  path: PlanePath;
+};

@@ -2,7 +2,7 @@
 import * as d3 from "d3";
 import "./style.css";
 
-import { PlanePath, LinePath, PoleRepresentation } from "./types";
+import { PlanePath, LinePath, PoleRepresentation, PlaneData } from "./types";
 
 const DEFAULT_STYLE = {
   outline: {
@@ -34,6 +34,13 @@ const DEFAULT_STYLE = {
     // fill: "#d14747",
     // "fill-opacity": 0.5,
   },
+  data_plane_pole: {
+    fill: "#d14747",
+    stroke: "#d14747",
+    "stroke-width": 2,
+    "stroke-opacity": 0.5,
+    "fill-opacity": 1,
+  },
   data_line: {
     fill: "#0328fc",
     stroke: "#0328fc",
@@ -53,11 +60,12 @@ interface StereonetOptions {
   size?: number;
   style?: Record<string, Record<string, any>>;
   animations?:
-    | {
-        duration: number;
-      }
-    | false;
+  | {
+    duration: number;
+  }
+  | false;
   showGraticules?: boolean; // New option to control graticules visibility
+  planes_represenation?: "pole" | "line"; // Style for planes, default is "line"
 }
 
 /**
@@ -80,12 +88,13 @@ export class Stereonet {
   styles: Record<string, Record<string, any>>;
   animations:
     | {
-        duration: number;
-      }
+      duration: number;
+    }
     | false;
-  planes: Map<string, PlanePath>;
+  planes: Map<string, PlaneData>;
   lines: Map<string, LinePath>;
   graticulesVisible: boolean; // State to track graticules visibility
+  planes_represenation: "pole" | "line"; // Representation style for planes
 
   constructor({
     selector = "body",
@@ -95,6 +104,7 @@ export class Stereonet {
       duration: 300,
     },
     showGraticules = true, // Default to showing graticules
+    planes_represenation = "line",
   }: StereonetOptions) {
     this.width = size;
     this.height = size;
@@ -102,6 +112,7 @@ export class Stereonet {
     this.styles = style;
     this.animations = animations;
     this.graticulesVisible = showGraticules;
+    this.planes_represenation = planes_represenation;
 
     this.svg = d3
       .select(selector)
@@ -131,23 +142,67 @@ export class Stereonet {
     this._renderOutlineCrosshairs();
   }
 
-  /**
-   * Returns the style for a given class name from this.styles object.
-   * It returns a string representation of the style object.
-   */
-  getStyle(className: string) {
-    const style = this.styles[className];
-    if (!style) {
-      throw new Error(`Style for class "${className}" not found.`);
+  setPlanesRepresentation(
+    representation: "pole" | "line"
+  ) {
+    if (representation !== "pole" && representation !== "line") {
+      throw new Error(
+        `Invalid representation type: ${representation}. Use "pole" or "line".`
+      );
     }
-    return Object.entries(style)
-      .map(([key, value]) => `${key}: ${value};`)
-      .join(" ");
-  }
+    this.planes_represenation = representation;
 
-  setStyle(className: string, style: Record<string, any>) {
-    this.styles[className] = style;
+    // Clear existing planes
+    const _cachedPlanes = Array.from(this.planes);
+    this.planes.forEach((plane, id) => {
+      this.planes.get(id)?.path.remove();
+      this.planes.delete(id);
+    });
+
+    // Re-render existing planes with the new representation
+    _cachedPlanes.forEach(([id, planeData]) => {
+      let path = null;
+      if (this.planes_represenation === "line") {
+        path = this._renderPlaneAsLine(
+          planeData.dipAngle,
+          planeData.dipDirection,
+          parseInt(id, 10)
+        );
+      }
+      if (this.planes_represenation === "pole") {
+        path = this._renderPlaneAsPole(
+          planeData.dipAngle,
+          planeData.dipDirection,
+          parseInt(id, 10)
+        );
+      }
+
+      this.planes.set(id, {
+        dipAngle: planeData.dipAngle,
+        dipDirection: planeData.dipDirection,
+        path: path as PlanePath,
+      });
+    })
   }
+    
+
+    /**
+     * Returns the style for a given class name from this.styles object.
+     * It returns a string representation of the style object.
+     */
+    getStyle(className: string) {
+      const style = this.styles[className];
+      if (!style) {
+        throw new Error(`Style for class "${className}" not found.`);
+      }
+      return Object.entries(style)
+        .map(([key, value]) => `${key}: ${value};`)
+        .join(" ");
+    }
+
+    setStyle(className: string, style: Record<string, any>) {
+      this.styles[className] = style;
+    }
 
   private _elementTransformString() {
     return `translate(${this.width / 2},${this.height / 2})`;
@@ -315,17 +370,20 @@ export class Stereonet {
       });
   }
 
-  /**
-   * Plots a line on the stereonet based on the given dip angle and dip direction.
-   */
-  addPlane(dipAngle: number, dipDirection: number) {
-    // Validate the dip angle and dip direction
-    if (!this._validateDipDirection(dipAngle, dipDirection)) {
-      return;
+
+  private _calculatePoleCoordinates(dipAngle: number, dipDirection: number): [number, number] {
+    let dd = dipDirection + 180; //% 360; // strike = dipDirection - 90°
+
+    if (dd >= 360) {
+      dd = dipDirection + 180 - 360; // Normalize to [0, 360)
     }
 
-    const id = this.planes.size;
+    const d = 90 - dipAngle;
+    return [d, dd];
+  }
 
+
+  private _renderPlaneAsLine(dipAngle: number, dipDirection: number, id: number) {
     const extentStart = 90 - dipAngle;
     const extentEnd = 90 - (dipAngle - 1);
 
@@ -345,30 +403,101 @@ export class Stereonet {
       .attr("style", this.getStyle("data_plane"))
       .attr(
         "transform",
-        `${this._elementTransformString()}  rotate(${dipDirection - 90})`
+        `${this._elementTransformString()} rotate(${dipDirection - 90})`
       )
       .attr("d", this.path)
       .attr("data-id", id);
 
     if (this.animations) {
       path
-        .style("opacity", 0) // Start with opacity 0 for animation
-        .transition() // Add transition for animation
-        .duration(300) // Animation duration in milliseconds
-        .style("opacity", 1); // Fade in the plane
+        .style("opacity", 0)
+        .transition()
+        .duration(this.animations.duration)
+        .style("opacity", 1);
     }
 
     this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
-
     this.planes.set(id.toString(), path as PlanePath);
+
+    return path
+
+  }
+
+  private _renderPlaneAsPole(dipAngle: number, dipDirection: number, id: number) {
+    const poleCoords = this._calculatePoleCoordinates(dipAngle, dipDirection);
+    const point = {
+      type: "Point",
+      coordinates: [0, 90 - poleCoords[0]],
+    } as PoleRepresentation;
+
+    const path = this.g
+      .append("path")
+      .datum(point)
+      .attr("style", this.getStyle("data_plane_pole"))
+      .attr(
+        "transform",
+        `${this._elementTransformString()} rotate(${poleCoords[1]})`
+      )
+      .attr("data-id", id);
+
+    if (this.animations) {
+      // @ts-ignore
+      path
+        .attr("d", this.path.pointRadius(0))
+        .style("opacity", 0)
+        .transition()
+        .duration(this.animations.duration)
+        // @ts-ignore
+        .attr("d", this.path.pointRadius(5))
+        .style("opacity", 1);
+    } else {
+      // @ts-ignore
+      path.attr("d", this.path.pointRadius(5));
+    }
+
+    this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
+    this.planes.set(id.toString(), path as PlanePath);
+
+    return path
+
+  }
+
+  /**
+   * Plots a line on the stereonet based on the given dip angle and dip direction.
+   */
+  addPlane(dipAngle: number, dipDirection: number) {
+    // Validate the dip angle and dip direction
+    if (!this._validateDipDirection(dipAngle, dipDirection)) {
+      return;
+    }
+
+    const id = this.planes.size;
+    let path = null;
+
+    if (this.planes_represenation === "line") {
+      path = this._renderPlaneAsLine(dipAngle, dipDirection, id);
+    }
+
+    if (this.planes_represenation === "pole") {
+      path = this._renderPlaneAsPole(dipAngle, dipDirection, id);
+    }
+
+    this.planes.set(id.toString(), {
+      dipAngle,
+      dipDirection,
+      path: path as PlanePath,
+    });
+
+
     return id;
   }
+
 
   removePlane(planeId: number) {
     const strId = planeId.toString();
 
     if (this.planes.has(strId)) {
-      this.planes.get(strId)?.remove();
+      this.planes.get(strId)?.path.remove();
       this.planes.delete(strId);
     }
   }
@@ -435,7 +564,6 @@ export class Stereonet {
 
     const id = this.lines.size;
 
-    // GeoJSON point for projection
     const point = {
       type: "Point",
       coordinates: [0, 90 - dipAngle],
