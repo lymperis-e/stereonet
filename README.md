@@ -47,6 +47,7 @@ const stereonet = new Stereonet({
   selector: "#container", // CSS selector for the container element
   size: 900,              // Size of the stereonet (default: 1000)
   showGraticules: true,   // Show graticules by default (default: true)
+  planeRepresentation: "arc", // Representation of planes, either arc or pole (default: "arc")
 });
 ```
 
@@ -60,6 +61,13 @@ stereonet.addPlane(30, 45); // Adds a plane with a dip angle of 30° and dip dir
 
 ```typescript
 const plane = stereonet.addLine(60, 90); // Adds a line with a dip angle of 60° and dip direction of 90°. Returns the ID of the added line.
+```
+
+### Set line representation
+You can set the representation of lines to either "arc" or "point". The default is "arc".
+
+```typescript
+stereonet.setLineRepresentation("pole"); // Sets the line representation to arc
 ```
 
 ### Removing Planes and Lines

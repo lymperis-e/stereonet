@@ -65,7 +65,7 @@ interface StereonetOptions {
   }
   | false;
   showGraticules?: boolean; // New option to control graticules visibility
-  planes_represenation?: "pole" | "line"; // Style for planes, default is "line"
+  planeRepresentation?: "pole" | "line"; // Style for planes, default is "line"
 }
 
 /**
@@ -94,7 +94,7 @@ export class Stereonet {
   planes: Map<string, PlaneData>;
   lines: Map<string, LinePath>;
   graticulesVisible: boolean; // State to track graticules visibility
-  planes_represenation: "pole" | "line"; // Representation style for planes
+  planeRepresentation: "pole" | "arc"; // Representation style for planes
 
   constructor({
     selector = "body",
@@ -104,7 +104,7 @@ export class Stereonet {
       duration: 300,
     },
     showGraticules = true, // Default to showing graticules
-    planes_represenation = "line",
+    planeRepresentation: planeRepresentation = "arc",
   }: StereonetOptions) {
     this.width = size;
     this.height = size;
@@ -112,7 +112,7 @@ export class Stereonet {
     this.styles = style;
     this.animations = animations;
     this.graticulesVisible = showGraticules;
-    this.planes_represenation = planes_represenation;
+    this.planeRepresentation = planeRepresentation;
 
     this.svg = d3
       .select(selector)
@@ -142,15 +142,15 @@ export class Stereonet {
     this._renderOutlineCrosshairs();
   }
 
-  setPlanesRepresentation(
-    representation: "pole" | "line"
+  setPlaneRepresentation(
+    representation: "pole" | "arc"
   ) {
-    if (representation !== "pole" && representation !== "line") {
+    if (representation !== "pole" && representation !== "arc") {
       throw new Error(
-        `Invalid representation type: ${representation}. Use "pole" or "line".`
+        `Invalid representation type: ${representation}. Use "pole" or "arc".`
       );
     }
-    this.planes_represenation = representation;
+    this.planeRepresentation = representation;
 
     // Clear existing planes
     const _cachedPlanes = Array.from(this.planes);
@@ -162,14 +162,14 @@ export class Stereonet {
     // Re-render existing planes with the new representation
     _cachedPlanes.forEach(([id, planeData]) => {
       let path = null;
-      if (this.planes_represenation === "line") {
+      if (this.planeRepresentation === "arc") {
         path = this._renderPlaneAsLine(
           planeData.dipAngle,
           planeData.dipDirection,
           parseInt(id, 10)
         );
       }
-      if (this.planes_represenation === "pole") {
+      if (this.planeRepresentation === "pole") {
         path = this._renderPlaneAsPole(
           planeData.dipAngle,
           planeData.dipDirection,
@@ -474,11 +474,11 @@ export class Stereonet {
     const id = this.planes.size;
     let path = null;
 
-    if (this.planes_represenation === "line") {
+    if (this.planeRepresentation === "arc") {
       path = this._renderPlaneAsLine(dipAngle, dipDirection, id);
     }
 
-    if (this.planes_represenation === "pole") {
+    if (this.planeRepresentation === "pole") {
       path = this._renderPlaneAsPole(dipAngle, dipDirection, id);
     }
 
