@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/lymperis-e/stereonet/compare/v1.1.5...v1.1.6) (2025-06-10)
+
+
+### Bug Fixes
+
+* update types and core logic ([4f96006](https://github.com/lymperis-e/stereonet/commit/4f96006c79a1653b1d297f3056efe837993f23d6))
+
 ## [1.1.5](https://github.com/lymperis-e/stereonet/compare/v1.1.4...v1.1.5) (2025-05-15)
 
 
