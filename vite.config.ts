@@ -12,6 +12,7 @@ const getPackageNameCamelCase = () => {
   try {
     return getPackageName().replace(/-./g, char => char[1].toUpperCase());
   } catch (err) {
+    console.error("Error retrieving package name:", err);
     throw new Error("Name property in package.json is missing.");
   }
 };

@@ -1,9 +1,16 @@
 import * as d3 from "d3";
 import "./style.css";
 
-import { PlanePath, LinePath, PoleRepresentation, PlaneData } from "./types";
+import {
+  PlanePath,
+  LinePath,
+  PoleRepresentation,
+  PlaneData,
+  StereonetStyle,
+  LineData,
+} from "./types";
 
-const DEFAULT_STYLE = {
+const DEFAULT_STYLE: StereonetStyle = {
   outline: {
     fill: "none",
     stroke: "#000",
@@ -55,14 +62,14 @@ const DEFAULT_STYLE = {
 interface StereonetOptions {
   selector: string;
   size?: number;
-  style?: Record<string, Record<string, any>>;
+  style?: Partial<StereonetStyle>;
   animations?:
-    | {
-        duration: number;
-      }
-    | false;
+  | {
+    duration: number;
+  }
+  | false;
   showGraticules?: boolean;
-  planeRepresentation?: "pole" | "line";
+  planeRepresentation?: "pole" | "arc";
 }
 
 export class Stereonet {
@@ -74,20 +81,19 @@ export class Stereonet {
   projection: d3.GeoProjection;
   path: d3.GeoPath;
   cardinalValues: string[];
-  styles: Record<string, Record<string, any>>;
+  styles: StereonetStyle;
   animations:
     | {
-        duration: number;
-      }
+      duration: number;
+    }
     | false;
   planes: Map<string, PlaneData>;
-  lines: Map<string, LinePath>;
+  lines: Map<string, LineData>;
   graticulesVisible: boolean;
   planeRepresentation: "pole" | "arc";
 
   constructor({
     selector = "body",
-    size = 1000,
     style = DEFAULT_STYLE,
     animations = {
       duration: 300,
@@ -100,7 +106,11 @@ export class Stereonet {
     this.width = rect.width;
     this.height = rect.width; // Maintain 1:1 aspect ratio
     this.selector = selector;
-    this.styles = style;
+    // @ts-expect-error no-issue
+    this.styles = {
+      ...DEFAULT_STYLE,
+      ...style,
+    };
     this.animations = animations;
     this.graticulesVisible = showGraticules;
     this.planeRepresentation = planeRepresentation;
@@ -147,9 +157,7 @@ export class Stereonet {
       .style("width", "100%")
       .style("height", "auto");
 
-    this.projection
-      .scale(this.width / Math.PI)
-      .translate([0, 0]);
+    this.projection.scale(this.width / Math.PI).translate([0, 0]);
 
     this.path = d3.geoPath().projection(this.projection);
 
@@ -166,17 +174,15 @@ export class Stereonet {
     this.planes.clear();
     this.lines.clear();
 
-    for (const [id, plane] of currentPlanes) {
+    for (const [, plane] of currentPlanes) {
       this.addPlane(plane.dipAngle, plane.dipDirection);
     }
-    for (const [id, line] of currentLines) {
+    for (const [, line] of currentLines) {
       this.addLine(line.dipAngle, line.dipDirection);
     }
   }
 
-  setPlaneRepresentation(
-    representation: "pole" | "arc"
-  ) {
+  setPlaneRepresentation(representation: "pole" | "arc") {
     if (representation !== "pole" && representation !== "arc") {
       throw new Error(
         `Invalid representation type: ${representation}. Use "pole" or "arc".`
@@ -186,7 +192,7 @@ export class Stereonet {
 
     // Clear existing planes
     const _cachedPlanes = Array.from(this.planes);
-    this.planes.forEach((plane, id) => {
+    this.planes.forEach((_plane, id) => {
       this.planes.get(id)?.path.remove();
       this.planes.delete(id);
     });
@@ -195,7 +201,7 @@ export class Stereonet {
     _cachedPlanes.forEach(([id, planeData]) => {
       let path = null;
       if (this.planeRepresentation === "arc") {
-        path = this._renderPlaneAsLine(
+        path = this._renderPlaneAsArc(
           planeData.dipAngle,
           planeData.dipDirection,
           parseInt(id, 10)
@@ -214,27 +220,26 @@ export class Stereonet {
         dipDirection: planeData.dipDirection,
         path: path as PlanePath,
       });
-    })
+    });
   }
-    
 
-    /**
-     * Returns the style for a given class name from this.styles object.
-     * It returns a string representation of the style object.
-     */
-    getStyle(className: string) {
-      const style = this.styles[className];
-      if (!style) {
-        throw new Error(`Style for class "${className}" not found.`);
-      }
-      return Object.entries(style)
-        .map(([key, value]) => `${key}: ${value};`)
-        .join(" ");
+  /**
+   * Returns the style for a given class name from this.styles object.
+   * It returns a string representation of the style object.
+   */
+  getStyle(className: string) {
+    const style = this.styles[className];
+    if (!style) {
+      throw new Error(`Style for class "${className}" not found.`);
     }
+    return Object.entries(style)
+      .map(([key, value]) => `${key}: ${value};`)
+      .join(" ");
+  }
 
-    setStyle(className: string, style: Record<string, any>) {
-      this.styles[className] = style;
-    }
+  setStyle(className: string, style: Record<string, never>) {
+    this.styles[className] = style;
+  }
 
   private _elementTransformString() {
     return `translate(${this.width / 2},${this.height / 2})`;
@@ -330,7 +335,6 @@ export class Stereonet {
     this.toggleGraticules(false);
   }
 
-
   private _validateDipDirection(dipAngle: number, dipDirection: number) {
     if (dipAngle < 0 || dipAngle > 90) {
       console.warn(
@@ -402,9 +406,11 @@ export class Stereonet {
       });
   }
 
-
-  private _calculatePoleCoordinates(dipAngle: number, dipDirection: number): [number, number] {
-    let dd = dipDirection + 180; //% 360; // strike = dipDirection - 90°
+  private _calculatePoleCoordinates(
+    dipAngle: number,
+    dipDirection: number
+  ): [number, number] {
+    let dd = dipDirection + 180;
 
     if (dd >= 360) {
       dd = dipDirection + 180 - 360; // Normalize to [0, 360)
@@ -414,8 +420,11 @@ export class Stereonet {
     return [d, dd];
   }
 
-
-  private _renderPlaneAsLine(dipAngle: number, dipDirection: number, id: number) {
+  private _renderPlaneAsArc(
+    dipAngle: number,
+    dipDirection: number,
+    id: number
+  ) {
     const extentStart = 90 - dipAngle;
     const extentEnd = 90 - (dipAngle - 1);
 
@@ -425,7 +434,7 @@ export class Stereonet {
         [extentStart, -90],
         [extentEnd, 90],
       ])
-      // @ts-ignore
+      // @ts-expect-error no-issue
       .step([1])
       .precision(1);
 
@@ -449,13 +458,17 @@ export class Stereonet {
     }
 
     this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
+    // @ts-expect-error no-issue
     this.planes.set(id.toString(), path as PlanePath);
 
-    return path
-
+    return path;
   }
 
-  private _renderPlaneAsPole(dipAngle: number, dipDirection: number, id: number) {
+  private _renderPlaneAsPole(
+    dipAngle: number,
+    dipDirection: number,
+    id: number
+  ) {
     const poleCoords = this._calculatePoleCoordinates(dipAngle, dipDirection);
     const point = {
       type: "Point",
@@ -473,25 +486,23 @@ export class Stereonet {
       .attr("data-id", id);
 
     if (this.animations) {
-      // @ts-ignore
       path
         .attr("d", this.path.pointRadius(0))
         .style("opacity", 0)
         .transition()
         .duration(this.animations.duration)
-        // @ts-ignore
         .attr("d", this.path.pointRadius(5))
         .style("opacity", 1);
     } else {
-      // @ts-ignore
       path.attr("d", this.path.pointRadius(5));
     }
 
+    // @ts-expect-error no-issue
     this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
+    // @ts-expect-error no-issue
     this.planes.set(id.toString(), path as PlanePath);
 
-    return path
-
+    return path;
   }
 
   /**
@@ -507,7 +518,7 @@ export class Stereonet {
     let path = null;
 
     if (this.planeRepresentation === "arc") {
-      path = this._renderPlaneAsLine(dipAngle, dipDirection, id);
+      path = this._renderPlaneAsArc(dipAngle, dipDirection, id);
     }
 
     if (this.planeRepresentation === "pole") {
@@ -520,10 +531,8 @@ export class Stereonet {
       path: path as PlanePath,
     });
 
-
     return id;
   }
-
 
   removePlane(planeId: number) {
     const strId = planeId.toString();
@@ -565,7 +574,7 @@ export class Stereonet {
 
     path
       .on("mouseover", function () {
-        // @ts-ignore
+        // @ts-expect-error no-issue
         d3.select(this).attr("d", classPath.pointRadius(9)); // Reset radius
         d3.select(this).style("stroke-width", "10px");
         tooltip
@@ -578,7 +587,7 @@ export class Stereonet {
           .style("top", event.pageY + 10 + "px");
       })
       .on("mouseout", function () {
-        // @ts-ignore
+        // @ts-expect-error no-issue
         d3.select(this).attr("d", classPath.pointRadius(5)); // Reset radius
         d3.select(this).style("stroke-width", "2px");
         tooltip.style("display", "none");
@@ -613,22 +622,25 @@ export class Stereonet {
 
     if (this.animations) {
       path
-        // @ts-ignore
         .attr("d", this.path.pointRadius(0))
         .style("opacity", 0) // Start with opacity 0 for animation
         .transition() // Add transition for animation
         .duration(this.animations.duration) // Animation duration in milliseconds
-        // @ts-ignore
         .attr("d", this.path.pointRadius(5))
         .style("opacity", 1); // Fade in the plane
     } else {
-      // @ts-ignore
       path.attr("d", this.path.pointRadius(5));
     }
 
     this._addLineHoverInteraction(path, dipAngle, dipDirection);
 
-    this.lines.set(id.toString(), path as LinePath);
+
+    this.lines.set(id.toString(), {
+      dipAngle,
+      dipDirection,
+      path: path as LinePath,
+    });
+
     return id;
   }
 
@@ -636,7 +648,7 @@ export class Stereonet {
     const strId = lineId.toString();
 
     if (this.lines.has(strId)) {
-      this.lines.get(strId)?.remove();
+      this.lines.get(strId)?.path.remove();
       this.lines.delete(strId);
     }
   }
