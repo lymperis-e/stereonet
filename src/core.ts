@@ -1,4 +1,3 @@
-// streont.js
 import * as d3 from "d3";
 import "./style.css";
 
@@ -31,8 +30,6 @@ const DEFAULT_STYLE = {
     stroke: "#d14747",
     "stroke-width": 3,
     fill: "none",
-    // fill: "#d14747",
-    // "fill-opacity": 0.5,
   },
   data_plane_pole: {
     fill: "#d14747",
@@ -60,22 +57,14 @@ interface StereonetOptions {
   size?: number;
   style?: Record<string, Record<string, any>>;
   animations?:
-  | {
-    duration: number;
-  }
-  | false;
-  showGraticules?: boolean; // New option to control graticules visibility
-  planeRepresentation?: "pole" | "line"; // Style for planes, default is "line"
+    | {
+        duration: number;
+      }
+    | false;
+  showGraticules?: boolean;
+  planeRepresentation?: "pole" | "line";
 }
 
-/**
- * Stereonet class for creating a stereonet plot using D3.js.
- * @class Stereonet
- * @param {Object} options - Configuration options for the stereonet.
- * @param {string} options.selector - The CSS selector for the container element.
- * @param {number} options.width - The width of the SVG element.
- * @param {number} options.height - The height of the SVG element.
- */
 export class Stereonet {
   width: number;
   height: number;
@@ -88,13 +77,13 @@ export class Stereonet {
   styles: Record<string, Record<string, any>>;
   animations:
     | {
-      duration: number;
-    }
+        duration: number;
+      }
     | false;
   planes: Map<string, PlaneData>;
   lines: Map<string, LinePath>;
-  graticulesVisible: boolean; // State to track graticules visibility
-  planeRepresentation: "pole" | "arc"; // Representation style for planes
+  graticulesVisible: boolean;
+  planeRepresentation: "pole" | "arc";
 
   constructor({
     selector = "body",
@@ -103,11 +92,13 @@ export class Stereonet {
     animations = {
       duration: 300,
     },
-    showGraticules = true, // Default to showing graticules
+    showGraticules = true,
     planeRepresentation: planeRepresentation = "arc",
   }: StereonetOptions) {
-    this.width = size;
-    this.height = size;
+    const container = document.querySelector(selector) as HTMLElement;
+    const rect = container.getBoundingClientRect();
+    this.width = rect.width;
+    this.height = rect.width; // Maintain 1:1 aspect ratio
     this.selector = selector;
     this.styles = style;
     this.animations = animations;
@@ -117,10 +108,10 @@ export class Stereonet {
     this.svg = d3
       .select(selector)
       .append("svg")
-      .attr("width", this.width)
-      .attr("height", this.height)
       .attr("viewBox", `0 0 ${this.width} ${this.height}`)
-      .attr("preserveAspectRatio", "xMinYMin meet");
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("width", "100%")
+      .style("height", "auto");
 
     this.g = this.svg.append("g");
 
@@ -140,6 +131,47 @@ export class Stereonet {
       this._renderBaseGraticules();
     }
     this._renderOutlineCrosshairs();
+
+    window.addEventListener("resize", () => this._resize());
+  }
+
+  private _resize() {
+    const container = document.querySelector(this.selector) as HTMLElement;
+    const rect = container.getBoundingClientRect();
+    this.width = rect.width;
+    this.height = rect.width; // Maintain square aspect ratio
+
+    this.svg
+      .attr("viewBox", `0 0 ${this.width} ${this.height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("width", "100%")
+      .style("height", "auto");
+
+    this.projection
+      .scale(this.width / Math.PI)
+      .translate([0, 0]);
+
+    this.path = d3.geoPath().projection(this.projection);
+
+    // Remove and re-render all content
+    this.g.selectAll("*").remove();
+
+    if (this.graticulesVisible) {
+      this._renderBaseGraticules();
+    }
+    this._renderOutlineCrosshairs();
+
+    const currentPlanes = Array.from(this.planes.entries());
+    const currentLines = Array.from(this.lines.entries());
+    this.planes.clear();
+    this.lines.clear();
+
+    for (const [id, plane] of currentPlanes) {
+      this.addPlane(plane.dipAngle, plane.dipDirection);
+    }
+    for (const [id, line] of currentLines) {
+      this.addLine(line.dipAngle, line.dipDirection);
+    }
   }
 
   setPlaneRepresentation(
