@@ -64,7 +64,7 @@ const plane = stereonet.addLine(60, 90); // Adds a line with a dip angle of 60°
 ```
 
 ### Set line representation
-You can set the representation of lines to either "arc" or "point". The default is "arc".
+You can set the representation of lines to either "arc" or "pole". The default is "arc".
 
 ```typescript
 stereonet.setLineRepresentation("pole"); // Sets the line representation to arc
