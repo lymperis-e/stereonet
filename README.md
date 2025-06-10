@@ -275,6 +275,7 @@ stereonet.setStyle("data_plane", { stroke: "#00ff00", "stroke-width": "5px" });
 The library is built on Github actions. A relase is automatically published to NPM using [semantic-release](https://github.com/semantic-release/semantic-release). Deployments are triggered when pushing on `main` branch with a commit message containting `feat`, `fix`, or `perf` (see the [docs](https://semantic-release.gitbook.io/semantic-release/recipes/release-workflow/distribution-channels))
 
 
+
 ### Github Pages
 
 To update the example on Github pages, run the following command:
