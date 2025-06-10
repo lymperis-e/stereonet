@@ -64,10 +64,10 @@ interface StereonetOptions {
   size?: number;
   style?: Partial<StereonetStyle>;
   animations?:
-  | {
-    duration: number;
-  }
-  | false;
+    | {
+        duration: number;
+      }
+    | false;
   showGraticules?: boolean;
   planeRepresentation?: "pole" | "arc";
 }
@@ -84,8 +84,8 @@ export class Stereonet {
   styles: StereonetStyle;
   animations:
     | {
-      duration: number;
-    }
+        duration: number;
+      }
     | false;
   planes: Map<string, PlaneData>;
   lines: Map<string, LineData>;
@@ -633,7 +633,6 @@ export class Stereonet {
     }
 
     this._addLineHoverInteraction(path, dipAngle, dipDirection);
-
 
     this.lines.set(id.toString(), {
       dipAngle,
