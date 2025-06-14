@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/lymperis-e/stereonet/compare/v1.2.2...v1.2.3) (2025-06-14)
+
+
+### Bug Fixes
+
+* fix disappearing points on hover ([b8408ac](https://github.com/lymperis-e/stereonet/commit/b8408ac43d8b54741722ec6b04c2c6fc1e599978))
+
 ## [1.2.2](https://github.com/lymperis-e/stereonet/compare/v1.2.1...v1.2.2) (2025-06-14)
 
 
