@@ -125,8 +125,9 @@ export class Stereonet {
     this.graticulesVisible = showGraticules;
     this.planeRepresentation = planeRepresentation;
 
+    // @ts-expect-error no-issue
     this.svg = d3
-      .select(selector)
+      .select<HTMLElement, unknown>(this.container || selector)
       .append("svg")
       .attr("viewBox", `0 0 ${this.width} ${this.height}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
