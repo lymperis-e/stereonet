@@ -583,7 +583,6 @@ export class Stereonet {
     }
 
     const tooltip = d3.select("#line-tooltip");
-
     const classPath = this.path;
 
     path
