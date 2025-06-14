@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/lymperis-e/stereonet/compare/v1.1.6...v1.2.0) (2025-06-14)
+
+
+### Features
+
+* pass HTML element isntead of query selector ([a9faa97](https://github.com/lymperis-e/stereonet/commit/a9faa9755fdf8340957645da6cbb393f7735c0d9))
+
 ## [1.1.6](https://github.com/lymperis-e/stereonet/compare/v1.1.5...v1.1.6) (2025-06-10)
 
 
