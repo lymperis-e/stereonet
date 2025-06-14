@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/lymperis-e/stereonet/compare/v1.2.1...v1.2.2) (2025-06-14)
+
+
+### Bug Fixes
+
+* build prev feat ([05155d4](https://github.com/lymperis-e/stereonet/commit/05155d4a5187f3b543838e82a929265d12144560))
+
 ## [1.2.1](https://github.com/lymperis-e/stereonet/compare/v1.2.0...v1.2.1) (2025-06-14)
 
 
