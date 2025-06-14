@@ -71,6 +71,7 @@ interface StereonetOptions {
     | false;
   showGraticules?: boolean;
   planeRepresentation?: "pole" | "arc";
+  pointSize?: number; 
 }
 
 export class Stereonet {
@@ -92,6 +93,7 @@ export class Stereonet {
   lines: Map<string, LineData>;
   graticulesVisible: boolean;
   planeRepresentation: "pole" | "arc";
+  pointSize: number; // Size of the points representing poles
 
   constructor({
     selector = "body",
@@ -101,6 +103,7 @@ export class Stereonet {
       duration: 300,
     },
     showGraticules = true,
+    pointSize = 5,
     planeRepresentation: planeRepresentation = "arc",
   }: StereonetOptions) {
     if (!selector && !element) {
@@ -124,6 +127,7 @@ export class Stereonet {
     this.animations = animations;
     this.graticulesVisible = showGraticules;
     this.planeRepresentation = planeRepresentation;
+    this.pointSize = pointSize;
 
     // @ts-expect-error no-issue
     this.svg = d3
@@ -501,10 +505,10 @@ export class Stereonet {
         .style("opacity", 0)
         .transition()
         .duration(this.animations.duration)
-        .attr("d", this.path.pointRadius(5))
+        .attr("d", this.path.pointRadius(this.pointSize))
         .style("opacity", 1);
     } else {
-      path.attr("d", this.path.pointRadius(5));
+      path.attr("d", this.path.pointRadius(this.pointSize));
     }
 
     // @ts-expect-error no-issue
@@ -585,7 +589,7 @@ export class Stereonet {
     path
       .on("mouseover", function () {
         // @ts-expect-error no-issue
-        d3.select(this).attr("d", classPath.pointRadius(9)); // Reset radius
+        d3.select(this).attr("d", classPath.pointRadius(this.pointSize * 1.7)); // Reset radius
         d3.select(this).style("stroke-width", "10px");
         tooltip
           .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
@@ -598,7 +602,7 @@ export class Stereonet {
       })
       .on("mouseout", function () {
         // @ts-expect-error no-issue
-        d3.select(this).attr("d", classPath.pointRadius(5)); // Reset radius
+        d3.select(this).attr("d", classPath.pointRadius(this.pointSize)); // Reset radius
         d3.select(this).style("stroke-width", "2px");
         tooltip.style("display", "none");
       });
@@ -636,10 +640,10 @@ export class Stereonet {
         .style("opacity", 0) // Start with opacity 0 for animation
         .transition() // Add transition for animation
         .duration(this.animations.duration) // Animation duration in milliseconds
-        .attr("d", this.path.pointRadius(5))
+        .attr("d", this.path.pointRadius(this.pointSize))
         .style("opacity", 1); // Fade in the plane
     } else {
-      path.attr("d", this.path.pointRadius(5));
+      path.attr("d", this.path.pointRadius(this.pointSize));
     }
 
     this._addLineHoverInteraction(path, dipAngle, dipDirection);
