@@ -60,7 +60,8 @@ const DEFAULT_STYLE: StereonetStyle = {
 };
 
 interface StereonetOptions {
-  selector: string;
+  selector?: string;
+  element?: HTMLElement;
   size?: number;
   style?: Partial<StereonetStyle>;
   animations?:
@@ -75,7 +76,7 @@ interface StereonetOptions {
 export class Stereonet {
   width: number;
   height: number;
-  selector: string;
+  container: HTMLElement;
   svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, undefined>;
   g: d3.Selection<SVGGElement, unknown, HTMLElement, undefined>;
   projection: d3.GeoProjection;
@@ -94,6 +95,7 @@ export class Stereonet {
 
   constructor({
     selector = "body",
+    element,
     style = DEFAULT_STYLE,
     animations = {
       duration: 300,
@@ -101,11 +103,19 @@ export class Stereonet {
     showGraticules = true,
     planeRepresentation: planeRepresentation = "arc",
   }: StereonetOptions) {
-    const container = document.querySelector(selector) as HTMLElement;
+    if (!selector && !element) {
+      throw new Error(
+        "Either 'selector' or 'element' must be provided to initialize Stereonet."
+      );
+    }
+
+    const container =
+      element || (document.querySelector(selector) as HTMLElement);
+
     const rect = container.getBoundingClientRect();
     this.width = rect.width;
     this.height = rect.width; // Maintain 1:1 aspect ratio
-    this.selector = selector;
+    this.container = container;
     // @ts-expect-error no-issue
     this.styles = {
       ...DEFAULT_STYLE,
@@ -146,8 +156,7 @@ export class Stereonet {
   }
 
   private _resize() {
-    const container = document.querySelector(this.selector) as HTMLElement;
-    const rect = container.getBoundingClientRect();
+    const rect = this.container.getBoundingClientRect();
     this.width = rect.width;
     this.height = rect.width; // Maintain square aspect ratio
 
