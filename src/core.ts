@@ -472,6 +472,7 @@ export class Stereonet {
     }
 
     this._addPlaneHoverInteraction(path, dipAngle, dipDirection);
+
     // @ts-expect-error no-issue
     this.planes.set(id.toString(), path as PlanePath);
 
