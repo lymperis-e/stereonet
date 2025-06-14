@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/lymperis-e/stereonet/compare/v1.2.0...v1.2.1) (2025-06-14)
+
+
+### Bug Fixes
+
+* no init ([58a5550](https://github.com/lymperis-e/stereonet/commit/58a5550d0e238d0d03963e65d1e47e067600b10c))
+
 # [1.2.0](https://github.com/lymperis-e/stereonet/compare/v1.1.6...v1.2.0) (2025-06-14)
 
 
