@@ -586,10 +586,12 @@ export class Stereonet {
     const tooltip = d3.select("#line-tooltip");
     const classPath = this.path;
 
+    const normalPointSize = this.pointSize;
+    const largePointSize = this.pointSize * 1.5;
     path
       .on("mouseover", function () {
         // @ts-expect-error no-issue
-        d3.select(this).attr("d", classPath.pointRadius(this.pointSize * 1.7)); // Reset radius
+        d3.select(this).attr("d", classPath.pointRadius(largePointSize)); // Reset radius
         d3.select(this).style("stroke-width", "10px");
         tooltip
           .html(`Dip: ${dipAngle}°, Dip Direction: ${dipDirection}°`)
@@ -602,7 +604,7 @@ export class Stereonet {
       })
       .on("mouseout", function () {
         // @ts-expect-error no-issue
-        d3.select(this).attr("d", classPath.pointRadius(this.pointSize)); // Reset radius
+        d3.select(this).attr("d", classPath.pointRadius(normalPointSize)); // Reset radius
         d3.select(this).style("stroke-width", "2px");
         tooltip.style("display", "none");
       });
