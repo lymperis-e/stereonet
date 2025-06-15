@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/lymperis-e/stereonet/compare/v1.2.3...v1.2.4) (2025-06-15)
+
+
+### Bug Fixes
+
+* don't use outline class, as it conflicts with ([e526946](https://github.com/lymperis-e/stereonet/commit/e5269461f0389cfe30d5db76c52b8208848190dc))
+
 ## [1.2.3](https://github.com/lymperis-e/stereonet/compare/v1.2.2...v1.2.3) (2025-06-14)
 
 
