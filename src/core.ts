@@ -11,7 +11,7 @@ import {
 } from "./types";
 
 const DEFAULT_STYLE: StereonetStyle = {
-  outline: {
+  stereonet_outline: {
     fill: "none",
     stroke: "#000",
     "stroke-width": "4px",
@@ -298,8 +298,8 @@ export class Stereonet {
     this.g
       .append("path")
       .datum(outline)
-      .attr("class", "outline")
-      .attr("style", this.getStyle("outline"))
+      .attr("class", "stereonet-outline")
+      .attr("style", this.getStyle("stereonet_outline"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
   }
@@ -328,7 +328,7 @@ export class Stereonet {
     this.g
       .append("path")
       .datum(outline)
-      .attr("style", this.getStyle("outline"))
+      .attr("style", this.getStyle("stereonet_outline"))
       .attr("transform", `${this._elementTransformString()} `)
       .attr("d", this.path);
   }
@@ -337,7 +337,7 @@ export class Stereonet {
     const show = v === undefined ? !this.graticulesVisible : v;
     this.graticulesVisible = show;
     this.g
-      .selectAll(".graticule, .graticule-10, .outline")
+      .selectAll(".graticule, .graticule-10, .stereonet_outline")
       .style("display", show ? "block" : "none");
   }
 
